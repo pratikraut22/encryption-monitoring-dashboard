@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Encryption Monitoring | Monthly Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="app-shell">
+<aside class="sidebar">
+  <div class="brand"><div class="brand-mark">E</div><div><b>ENCRYPTION</b><small>MONITORING SUITE</small></div></div>
+  <div class="side-label">WORKSPACE</div>
+  <button class="nav-item active" data-target="overview"><span>▦</span> Overview</button>
+  <button class="nav-item" data-target="daily"><span>◷</span> Daily analytics</button>
+  <button class="nav-item" data-target="weekly"><span>▥</span> Weekly performance</button>
+  <button class="nav-item" data-target="operators"><span>♙</span> Operator insights</button>
+  <button class="nav-item" data-target="networks"><span>▤</span> Network register</button>
+  <button class="nav-item" data-target="billing"><span>₹</span> Billing overview</button>
+  <div class="sidebar-bottom"><div class="secure-dot"></div><span>Local-first workspace</span><small>Your uploaded workbook is processed in this browser.</small></div>
+</aside>
+<main class="main">
+<header class="topbar">
+  <div><div class="eyebrow">OPERATIONS INTELLIGENCE / MONTHLY REPORT</div><h1>Encryption monitoring</h1><p class="subtitle">Network status, operator delivery and weekly achievement at a glance.</p></div>
+  <div class="top-actions">
+    <label class="upload-btn" for="excelFile">＋ Upload monthly Excel</label><input id="excelFile" type="file" accept=".xlsx,.xls" hidden>
+    <button class="icon-btn" id="exportCsv" title="Export filtered network data">⇩ <span>Export CSV</span></button>
+    <button class="icon-btn" id="printBtn" title="Print dashboard">⎙</button>
+  </div>
+</header>
+<section class="toolbar">
+ <div class="month-control"><span class="muted">REPORTING PERIOD</span><select id="monthSelect" aria-label="Reporting month"></select></div>
+ <div class="filter"><label>State</label><select id="stateFilter"><option value="">All states</option></select></div>
+ <div class="filter"><label>Operator</label><select id="operatorFilter"><option value="">All operators</option></select></div>
+ <div class="filter"><label>Category</label><select id="categoryFilter"><option value="">All categories</option></select></div>
+ <div class="filter"><label>Billing</label><select id="billingFilter"><option value="">All billing</option><option>YES</option><option>PENDING</option></select></div>
+ <button class="reset-btn" id="resetFilters">Reset filters ↺</button>
+</section>
+<div id="notice" class="notice" role="status"></div>
+<section id="overview" class="page-section">
+ <div class="section-head"><div><div class="eyebrow">MONTHLY SNAPSHOT</div><h2>Performance overview</h2></div><div class="updated" id="updatedAt">Workbook data loaded</div></div>
+ <div class="kpi-grid">
+  <article class="kpi"><div class="kpi-top"><span>Total networks</span><i class="kpi-icon blue">▤</i></div><strong id="kNetworks">—</strong><small>Unique network records</small></article>
+  <article class="kpi"><div class="kpi-top"><span>Channels scanned</span><i class="kpi-icon violet">◉</i></div><strong id="kChannels">—</strong><small>MSO scan channel count</small></article>
+  <article class="kpi"><div class="kpi-top"><span>Billing completed</span><i class="kpi-icon green">✓</i></div><strong id="kBilling">—</strong><small id="kBillingSub">As per billing status</small></article>
+  <article class="kpi"><div class="kpi-top"><span>Billing pending</span><i class="kpi-icon amber">◷</i></div><strong id="kPending">—</strong><small>Networks awaiting billing</small></article>
+  <article class="kpi"><div class="kpi-top"><span>Week 44 achievement</span><i class="kpi-icon teal">↗</i></div><strong id="kWeek">—</strong><small>WEEKLY REPORT · Week 44</small></article>
+  <article class="kpi"><div class="kpi-top"><span>Reported weeks</span><i class="kpi-icon blue">▥</i></div><strong id="kWeekAvg">—</strong><small>Average weekly completion rate</small></article>
+ </div>
+ <div class="grid-two">
+  <article class="panel"><div class="panel-head"><div><h3>Weekly achievement trend</h3><p>Network counts reported for each week</p></div><span class="pill">W40–W44</span></div><div class="chart-wrap"><canvas id="weeklyChart"></canvas></div></article>
+  <article class="panel"><div class="panel-head"><div><h3>Billing status split</h3><p>As recorded in WEEKLY REPORT</p></div></div><div class="chart-wrap donut"><canvas id="billingChart"></canvas></div><div id="billingLegend" class="legend-row"></div></article>
+ </div>
+ <div class="grid-two">
+  <article class="panel"><div class="panel-head"><div><h3>Operator workload</h3><p>Network assignment by operation name</p></div></div><div class="chart-wrap"><canvas id="operatorChart"></canvas></div></article>
+  <article class="panel"><div class="panel-head"><div><h3>Network category mix</h3><p>Category distribution in master list</p></div></div><div class="chart-wrap donut"><canvas id="categoryChart"></canvas></div></article>
+ </div>
+</section>
+<section id="daily" class="page-section">
+ <div class="section-head"><div><div class="eyebrow">DAY-BY-DAY STATUS</div><h2>Daily encryption analytics</h2><p class="section-desc">Counts are derived from the daily status columns in <b>Main - Star</b>. Date coverage follows the uploaded workbook.</p></div></div>
+ <div class="status-strip">
+  <div><span class="dot yes"></span><label>YES</label><b id="dYes">—</b></div><div><span class="dot inc"></span><label>INC</label><b id="dInc">—</b></div><div><span class="dot faulty"></span><label>Faulty Machine</label><b id="dFaulty">—</b></div><div><span class="dot moff"></span><label>M Off</label><b id="dMoff">—</b></div><div><span class="dot no"></span><label>No Report</label><b id="dNo">—</b></div>
+ </div>
+ <article class="panel"><div class="panel-head"><div><h3>Daily status movement</h3><p>Daily counts across all network rows</p></div></div><div class="chart-wrap tall"><canvas id="dailyChart"></canvas></div></article>
+ <article class="panel table-panel"><div class="panel-head"><div><h3>Daily summary</h3><p>Source worksheet: SUMMARY</p></div></div><div class="table-scroll"><table><thead><tr><th>Date</th><th>Day</th><th>YES</th><th>INC</th><th>Faulty Machine</th><th>M Off</th><th>No Report</th><th>Total</th><th>YES / Total</th></tr></thead><tbody id="dailyTable"></tbody></table></div></article>
+</section>
+<section id="weekly" class="page-section">
+ <div class="section-head"><div><div class="eyebrow">WEEK 40 TO WEEK 44</div><h2>Weekly performance</h2></div></div>
+ <div class="grid-two">
+  <article class="panel"><div class="panel-head"><div><h3>Week-wise achieved networks</h3><p>Counts from WEEKLY REPORT</p></div></div><div class="chart-wrap"><canvas id="weekCompareChart"></canvas></div></article>
+  <article class="panel"><div class="panel-head"><div><h3>Operator × week</h3><p>Network count by operation and week</p></div></div><div class="chart-wrap"><canvas id="operatorWeeksChart"></canvas></div></article>
+ </div>
+ <article class="panel table-panel"><div class="panel-head"><div><h3>Weekly achievement register</h3><p>Filter the table using the toolbar above</p></div></div><div class="table-scroll"><table><thead><tr><th>Operator</th><th>Networks</th><th>W40</th><th>W41</th><th>W42</th><th>W43</th><th>W44</th><th>W44 rate</th></tr></thead><tbody id="weeklyTable"></tbody></table></div></article>
+</section>
+<section id="operators" class="page-section">
+ <div class="section-head"><div><div class="eyebrow">TEAM DELIVERY</div><h2>Operator insights</h2><p class="section-desc">Operator is sourced from the Operation Name field in WEEKLY REPORT.</p></div></div>
+ <div class="grid-two">
+  <article class="panel"><div class="panel-head"><div><h3>Top operators by W44</h3><p>Highest weekly network count</p></div></div><div class="chart-wrap"><canvas id="topOperatorChart"></canvas></div></article>
+  <article class="panel"><div class="panel-head"><div><h3>Network billing completion by operator</h3><p>YES vs PENDING status</p></div></div><div class="chart-wrap"><canvas id="operatorBillingChart"></canvas></div></article>
+ </div>
+ <article class="panel table-panel"><div class="panel-head"><div><h3>Operator performance ranking</h3><p>Click a row to filter the network register by operator</p></div></div><div class="table-scroll"><table><thead><tr><th>Rank</th><th>Operator</th><th>Networks</th><th>Channels</th><th>W40</th><th>W41</th><th>W42</th><th>W43</th><th>W44</th><th>Billing YES</th><th>Billing pending</th></tr></thead><tbody id="operatorTable"></tbody></table></div></article>
+</section>
+<section id="networks" class="page-section">
+ <div class="section-head"><div><div class="eyebrow">NETWORK-LEVEL DETAIL</div><h2>Network register</h2><p class="section-desc">Search and inspect network, location, operator, weekly and billing information.</p></div><div class="search-box"><input id="searchInput" placeholder="Search OP ID, city, network, operator…"></div></div>
+ <div class="table-meta"><span id="tableCount">— records</span><span>Use Export CSV to download the filtered view</span></div>
+ <article class="panel table-panel"><div class="table-scroll large"><table><thead><tr><th>OP ID</th><th>State</th><th>City</th><th>Machine</th><th>Network / Operator name</th><th>Operation</th><th>Channels</th><th>Category</th><th>W40</th><th>W41</th><th>W42</th><th>W43</th><th>W44</th><th>Billing</th><th>Final amount</th></tr></thead><tbody id="networkTable"></tbody></table></div><div class="pagination"><button id="prevPage">← Previous</button><span id="pageInfo">Page 1</span><button id="nextPage">Next →</button></div></article>
+</section>
+<section id="billing" class="page-section">
+ <div class="section-head"><div><div class="eyebrow">BILLING CONTROL</div><h2>Billing overview</h2><p class="section-desc">Billing status, budget and final amount fields from WEEKLY REPORT.</p></div></div>
+ <div class="grid-two">
+  <article class="panel"><div class="panel-head"><div><h3>Budget vs final amount</h3><p>Sum of workbook values</p></div></div><div class="chart-wrap"><canvas id="budgetChart"></canvas></div></article>
+  <article class="panel"><div class="panel-head"><div><h3>Billing by category</h3><p>Completed and pending network count</p></div></div><div class="chart-wrap"><canvas id="billingCategoryChart"></canvas></div></article>
+ </div>
+ <article class="panel table-panel"><div class="panel-head"><div><h3>Billing register</h3><p>As Per Billing · Budget · Final Amount to Pay</p></div></div><div class="table-scroll"><table><thead><tr><th>OP ID</th><th>Operation</th><th>Category</th><th>Billing status</th><th>Budget</th><th>Final amount</th></tr></thead><tbody id="billingTable"></tbody></table></div></article>
+</section>
+<footer><span>ENCRYPTION MONITORING SUITE</span><span>Workbook-driven reporting · Browser-side processing</span></footer>
+</main></div>
+<script src="data.js"></script><script src="app.js"></script>
+</body></html>
